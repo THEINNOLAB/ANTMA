@@ -174,12 +174,21 @@ Security: Prefer GitHub private vulnerability reporting. If unavailable, open a 
 
 ANTMA is licensed under the Apache License 2.0. See `LICENSE`.
 
+## Release
+
+Current package release: `v0.1.0`.
+
+- PyPI: `https://pypi.org/project/antma/0.1.0/`
+- Install: `pip install antma`
+- GitHub Release: `v0.1.0` still needs to be created from the published
+  release commit.
+
 ## Project Status
 
-ANTMA is an early public beta release candidate. The first goal is to make the
-architecture, schemas, resolver, sanitizer, templates, local search path,
-promotion flow, and evidence flow clear enough to review and use from source.
+ANTMA is an early public beta package. Version `0.1.0` is published on PyPI and
+the repository includes public-release docs, issue and pull request templates,
+and a GitHub Actions test workflow.
 
-The repository includes public-release preparation docs, issue and pull request
-templates, and a GitHub Actions test workflow. Package registry publication is a
-separate later step after release review is finalized.
+The current focus is keeping the memory architecture small, reviewable, and
+public-safe while improving examples, tests, documentation, and narrowly scoped
+CLI/library behavior.
