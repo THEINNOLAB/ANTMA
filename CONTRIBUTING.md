@@ -1,45 +1,90 @@
-# Contributing
+# Contributing to ANTMA
 
-ANTMA is an early local-first memory architecture library. Contributions should
-keep the project generic, privacy-safe, and easy to review.
+Thank you for your interest in contributing to ANTMA.
 
-## Development Setup
+ANTMA is a focused architecture and toolkit for AI-native team memory. It is
+designed to help teams manage agent operating memory, reusable knowledge banks,
+source-of-truth documents, promotion workflows, and evidence-aware continuity.
 
-```bash
-python3 -m venv .venv
-source .venv/bin/activate
-pip install -e ".[dev]"
-```
+## Project Scope
 
-Run the test suite before opening a pull request:
+We welcome contributions that improve:
 
-```bash
-python -m pytest -q
-python -m compileall -q src tests
-antma sanitize .
-```
+- Documentation clarity
+- Examples and templates
+- Bug fixes
+- Test coverage
+- Small, focused CLI or library improvements
+- Public-safe memory architecture patterns
 
-## Contribution Guidelines
+ANTMA is not intended to become:
 
-- Keep examples synthetic and public-safe.
-- Do not add credentials, private paths, personal chat transcripts, customer
-  data, or company-specific operating documents.
-- Prefer small, focused changes with clear tests or documentation.
-- Update docs when behavior, CLI commands, schemas, or workspace shape changes.
-- Add an evidence note when a change claims release readiness or completion.
+- A hosted memory service
+- A messaging or agent-routing runtime
+- A private company operating system
+- A general-purpose AI agent framework
+- A replacement for all memory backends
 
-## Documentation Rules
+Large changes should start as an issue or discussion before a pull request.
 
-- Current project state belongs in `docs/live/CURRENT-STATE.md`.
-- Next actions belong in `docs/live/NEXT-STEPS.md`.
-- Work events belong in `docs/live/WORKLOG.md`.
-- Stable explanations belong in top-level files under `docs/`.
+## How to Contribute
 
-## Pull Request Checklist
+1. Open an issue for bugs, questions, or proposals.
+2. Fork the repository.
+3. Create a focused branch.
+4. Make a small, reviewable change.
+5. Run the available tests and checks.
+6. Open a pull request with a clear summary.
 
-- [ ] The change is generic and privacy-safe.
-- [ ] Tests pass locally.
-- [ ] `antma sanitize .` reports no findings.
-- [ ] Relevant docs are updated.
-- [ ] Remaining risks or follow-up work are stated.
+## Pull Request Guidelines
 
+A good pull request should:
+
+- Explain what changed and why
+- Stay within ANTMA's project scope
+- Include tests or examples when appropriate
+- Avoid private, sensitive, or company-specific data
+- Keep documentation public-safe and reusable
+- Avoid broad refactors unless previously discussed
+
+Maintainers may ask for changes, split large pull requests, or close pull
+requests that are outside the current project direction.
+
+## Public-Safe Contributions
+
+Please do not include:
+
+- Secrets, credentials, tokens, or API keys
+- Private user or company memory
+- Internal operating documents
+- Customer data
+- Private file paths or system details
+- Non-public business methods or workflows
+
+If you are unsure whether something is public-safe, open an issue first and
+describe it at a high level without sensitive details.
+
+## Issue Guidelines
+
+When opening a bug report, include:
+
+- What you expected to happen
+- What actually happened
+- Steps to reproduce
+- Relevant command output, if safe to share
+- Your Python version and operating system, if relevant
+
+For feature requests, explain the use case and why it fits ANTMA's scope.
+
+## Maintainer Review
+
+The maintainers are responsible for keeping ANTMA focused, public-safe, and
+useful. Not every suggestion will be accepted, even when it is thoughtful.
+
+Maintainers may close issues or pull requests that are not actionable, outside
+project scope, duplicate, or better suited for a downstream project.
+
+## License
+
+By contributing to ANTMA, you agree that your contribution will be licensed
+under the Apache License 2.0.

@@ -1,43 +1,69 @@
 # Security Policy
 
-ANTMA is designed as a local-first project. It should not receive secrets,
-private runtime configuration, customer data, or personal chat transcripts.
+Thank you for helping keep ANTMA safe.
+
+ANTMA is a local-first architecture and toolkit for AI-native team memory.
+Because memory systems may involve sensitive operational context, reports about
+privacy, data leakage, unsafe defaults, or secret exposure are taken seriously.
 
 ## Supported Versions
 
-ANTMA is currently an early pre-release scaffold. Security fixes should target
-the current main branch until public versioning begins.
+ANTMA is currently in an early public release stage. Security reports should
+target the latest version on the main branch unless a release policy is
+published later.
 
-## Reporting A Vulnerability
+## Reporting a Vulnerability
 
-Do not post secrets or sensitive reproduction data in public issues.
+Please prefer GitHub private vulnerability reporting if it is available for
+this repository.
 
-Prefer GitHub private vulnerability reporting. If unavailable, open a
-public-safe issue requesting a private disclosure channel; do not include
-sensitive details in the public issue.
+If private vulnerability reporting is not available, open a public-safe issue
+requesting a private disclosure channel. Do not include sensitive details,
+exploit steps, secrets, private data, or live vulnerability details in a public
+issue.
 
-## Scope
+Use wording like:
 
-Please report:
+> I would like to report a potential security issue privately. Please provide a
+> private disclosure channel.
 
-- secret or private-context leakage in generated workspaces
-- sanitizer bypasses
-- unsafe release guidance
-- unexpected network or file-system behavior
-- dependency or packaging issues that could expose private data
+## What to Report
 
-## Privacy Review
+Please report issues such as:
 
-Before publishing any release, run:
+- Accidental exposure of secrets or private data
+- Unsafe handling of memory files or knowledge-bank content
+- Public examples that include sensitive information
+- Sanitizer bypasses
+- Path traversal or unsafe file access behavior
+- Vulnerabilities in CLI behavior
+- Documentation that could encourage unsafe disclosure
 
-```bash
-antma sanitize .
-```
+## What Not to Include Publicly
 
-Then manually review:
+Please do not post the following in public issues or pull requests:
 
-- examples and templates
-- documentation
-- generated files
-- screenshots or media
-- git history
+- API keys, tokens, credentials, or secrets
+- Private user or company memory
+- Customer data
+- Internal operating documents
+- Full exploit details before a private channel is established
+- Sensitive local paths or environment details
+
+## Maintainer Response
+
+Maintainers will make a best effort to:
+
+- Acknowledge security reports promptly
+- Confirm whether the issue affects ANTMA
+- Prioritize fixes based on severity and scope
+- Avoid exposing sensitive details during triage
+- Credit reporters when appropriate and safe
+
+ANTMA is maintained as an open source project, so response times may vary.
+Please avoid public disclosure until maintainers have had a reasonable
+opportunity to assess and address the issue.
+
+## License
+
+ANTMA is licensed under the Apache License 2.0.
