@@ -14,10 +14,13 @@ reviewed public snapshot.
 - [ ] `INSTALL.md` covers local, editable, and Git URL installation.
 - [ ] `LICENSE` is final.
 - [ ] CLI command works after `pip install .`.
-- [ ] Public repository URL is added to install guidance after the GitHub
-      repository exists.
-- [ ] Maintainer contact or GitHub private vulnerability reporting is configured
-      after the GitHub repository exists.
+- [ ] Public repository URL is added to install guidance:
+      `https://github.com/THEINNOLAB/ANTMA`.
+- [ ] Maintainer is listed as THEINNOLAB and authorship remains
+      `ANTMA contributors`.
+- [ ] General contact points to GitHub Issues.
+- [ ] GitHub private vulnerability reporting is enabled if it will be used for
+      sensitive reports.
 
 ## Scope Exclusions
 

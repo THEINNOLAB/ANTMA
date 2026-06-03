@@ -13,9 +13,10 @@ the current main branch until public versioning begins.
 Do not post secrets or sensitive reproduction data in public issues.
 
 Use GitHub private vulnerability reporting if it is enabled. If private
-reporting is not available yet, contact the maintainer through the published
-release channel and include only a minimal, public-safe summary until a private
-channel is agreed.
+reporting is not available yet, open a minimal public-safe issue at
+`https://github.com/THEINNOLAB/ANTMA/issues` asking for a private reporting
+channel. Do not include secrets, exploit details, private paths, customer data,
+or sensitive reproduction material in a public issue.
 
 ## Scope
 

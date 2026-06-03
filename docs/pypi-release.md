@@ -1,13 +1,14 @@
 # PyPI Release Guide
 
-ANTMA is not ready for PyPI until public repository metadata, maintainer contact
+ANTMA is not ready for PyPI until public repository metadata, security contact
 channels, and release review are finalized. Use this guide as the release path
 once those details are ready.
 
 ## Prerequisites
 
-- Public repository URL selected.
-- Maintainer contact or private vulnerability reporting configured.
+- Public repository URL selected: `https://github.com/THEINNOLAB/ANTMA`.
+- Maintainer listed as THEINNOLAB with authorship as `ANTMA contributors`.
+- Security reporting route configured.
 - `CHANGELOG.md` updated.
 - `SECURITY.md` reviewed.
 - Public-safe examples and templates reviewed.
@@ -49,4 +50,3 @@ After publishing:
 - include release notes
 - verify install from a clean environment
 - run a sample `antma init`, `sanitize`, `index`, and `search` flow
-

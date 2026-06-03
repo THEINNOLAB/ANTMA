@@ -157,6 +157,16 @@ names, or company-specific operating documents.
 
 See `docs/privacy-boundary.md` for the full rule.
 
+## Community And Contact
+
+ANTMA is maintained as a contributor-led public project. Package authorship is
+listed as `ANTMA contributors`, with THEINNOLAB maintaining the public GitHub
+repository.
+
+- General questions and bug reports: `https://github.com/THEINNOLAB/ANTMA/issues`
+- Sensitive security reports: use GitHub private vulnerability reporting if it
+  is enabled for the repository.
+
 ## Project Status
 
 ANTMA is an early public beta release candidate. The first goal is to make the
@@ -165,5 +175,4 @@ promotion flow, and evidence flow clear enough to review and use from source.
 
 The repository includes public-release preparation docs, issue and pull request
 templates, and a GitHub Actions test workflow. Package registry publication is a
-separate later step after repository metadata, maintainer contact, and release
-review are finalized.
+separate later step after release review is finalized.

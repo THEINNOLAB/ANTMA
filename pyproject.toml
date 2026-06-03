@@ -12,6 +12,9 @@ license = { text = "MIT" }
 authors = [
   { name = "ANTMA contributors" }
 ]
+maintainers = [
+  { name = "THEINNOLAB" }
+]
 keywords = ["ai-agents", "memory", "markdown", "obsidian", "knowledge-management"]
 classifiers = [
   "Development Status :: 2 - Pre-Alpha",
@@ -24,6 +27,13 @@ classifiers = [
   "Programming Language :: Python :: 3.12",
 ]
 dependencies = []
+
+[project.urls]
+Homepage = "https://github.com/THEINNOLAB/ANTMA"
+Repository = "https://github.com/THEINNOLAB/ANTMA"
+Issues = "https://github.com/THEINNOLAB/ANTMA/issues"
+Security = "https://github.com/THEINNOLAB/ANTMA/security/advisories"
+Changelog = "https://github.com/THEINNOLAB/ANTMA/blob/main/CHANGELOG.md"
 
 [project.optional-dependencies]
 dev = ["pytest>=8"]

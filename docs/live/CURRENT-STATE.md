@@ -5,6 +5,16 @@ Updated: 2026-06-03
 ANTMA is an initial public GitHub release candidate for a local-first memory
 architecture library.
 
+Public repository URL: `https://github.com/THEINNOLAB/ANTMA`
+
+Maintainer: THEINNOLAB
+
+Authorship: ANTMA contributors
+
+General contact: `https://github.com/THEINNOLAB/ANTMA/issues`
+
+Sensitive security reports: GitHub private vulnerability reporting, if enabled.
+
 ## Ready
 
 - Core package, CLI, schemas, resolver, sanitizer, SQLite FTS index, promotion
@@ -31,6 +41,6 @@ PYTHONPATH=src python3 -m compileall -q src tests
 PYTHONPATH=src python3 -m antma.cli sanitize .
 ```
 
-After creating the public GitHub repository, configure repository metadata,
-maintainer contact or private vulnerability reporting, and the final public
-clone URL in installation guidance.
+The public repository URL is reflected in package and installation metadata.
+Before pushing, configure repository metadata and enable GitHub private
+vulnerability reporting if that route will be used for sensitive reports.
