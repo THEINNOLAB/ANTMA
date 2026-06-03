@@ -84,6 +84,11 @@ useful. Not every suggestion will be accepted, even when it is thoughtful.
 Maintainers may close issues or pull requests that are not actionable, outside
 project scope, duplicate, or better suited for a downstream project.
 
+A contributor may be invited into a maintainer role after sustained,
+high-quality contributions, respectful collaboration, good judgment around
+project scope, and a clear understanding of ANTMA's public-safety and security
+boundaries.
+
 ## License
 
 By contributing to ANTMA, you agree that your contribution will be licensed
