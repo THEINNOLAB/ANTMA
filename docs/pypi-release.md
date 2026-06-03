@@ -1,8 +1,14 @@
 # PyPI Release Guide
 
-ANTMA is not ready for PyPI until public repository metadata, security contact
-channels, and release review are finalized. Use this guide as the release path
-once those details are ready.
+ANTMA 0.1.0 is published on PyPI:
+
+```bash
+pip install antma
+```
+
+Project page: `https://pypi.org/project/antma/`
+
+Use this guide for future package releases.
 
 ## Prerequisites
 
@@ -50,3 +56,11 @@ After publishing:
 - include release notes
 - verify install from a clean environment
 - run a sample `antma init`, `sanitize`, `index`, and `search` flow
+
+## Install Verification
+
+```bash
+python -m venv /tmp/antma-install-check
+/tmp/antma-install-check/bin/python -m pip install antma
+/tmp/antma-install-check/bin/antma --help
+```

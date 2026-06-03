@@ -1,7 +1,7 @@
 # Install ANTMA
 
 ANTMA is a Python package. It can be installed from a local checkout, an
-editable developer checkout, or the public Git repository.
+editable developer checkout, PyPI, or the public Git repository.
 
 ## Requirements
 
@@ -11,7 +11,21 @@ editable developer checkout, or the public Git repository.
 
 ANTMA has no runtime third-party dependencies in the initial version.
 
-## Option 1: Install From A Local Checkout
+## Option 1: Install From PyPI
+
+```bash
+python3 -m venv .venv
+source .venv/bin/activate
+pip install antma
+```
+
+Check the CLI:
+
+```bash
+antma --help
+```
+
+## Option 2: Install From A Local Checkout
 
 ```bash
 git clone https://github.com/THEINNOLAB/ANTMA.git antma
@@ -27,7 +41,7 @@ Check the CLI:
 antma --help
 ```
 
-## Option 2: Editable Developer Install
+## Option 3: Editable Developer Install
 
 ```bash
 git clone https://github.com/THEINNOLAB/ANTMA.git antma
@@ -38,7 +52,7 @@ pip install -e ".[dev]"
 pytest
 ```
 
-## Option 3: Install From A Git URL
+## Option 4: Install From A Git URL
 
 Users can install directly from the Git URL:
 

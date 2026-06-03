@@ -11,9 +11,9 @@ reviewed public snapshot.
 - [ ] `pyproject.toml` metadata is accurate.
 - [ ] `README.md` explains the project and quick start.
 - [ ] `README.md` defines ANTMA as a small memory architecture core.
-- [ ] `INSTALL.md` covers local, editable, and Git URL installation.
+- [ ] `INSTALL.md` covers PyPI, local, editable, and Git URL installation.
 - [ ] `LICENSE` contains the Apache License 2.0 text.
-- [ ] CLI command works after `pip install .`.
+- [ ] CLI command works after `pip install antma`.
 - [ ] Public repository URL is added to install guidance:
       `https://github.com/THEINNOLAB/ANTMA`.
 - [ ] Maintainer is listed as THEINNOLAB and authorship remains
@@ -39,7 +39,7 @@ reviewed public snapshot.
 - [ ] `python3 -m pytest -q`
 - [ ] `PYTHONPATH=src python3 -m compileall -q src tests`
 - [ ] `PYTHONPATH=src python3 -m antma.cli sanitize .`
-- [ ] clean venv install with `pip install .`
+- [ ] clean venv install from PyPI with `pip install antma`
 - [ ] `antma init`, `antma sanitize`, `antma promote`, `antma evidence`, `antma index`, `antma doctor`, and `antma search`
 
 ## Privacy

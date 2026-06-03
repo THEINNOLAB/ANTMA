@@ -59,20 +59,18 @@ ANTMA intentionally does not include:
 - hosted memory services
 - automatic promotion or dreaming loops
 
-## Install From Source
+## Install
 
 ```bash
-python3 -m venv .venv
-source .venv/bin/activate
-pip install .
+pip install antma
 ```
 
-For local checkout, editable developer install, Git URL install, and first-run
-checks, see `INSTALL.md`.
+For virtual environment setup, source checkout, editable developer install, Git
+URL install, and first-run checks, see `INSTALL.md`.
 
 ## Documentation
 
-- `INSTALL.md`: local checkout, editable, and Git URL install paths.
+- `INSTALL.md`: PyPI, local checkout, editable, and Git URL install paths.
 - `docs/tutorial.md`: first workspace, evidence, promotion, scan, index, and
   search workflow.
 - `docs/api-reference.md`: CLI and Python API reference.

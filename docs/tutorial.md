@@ -4,15 +4,16 @@ This tutorial walks through a small ANTMA workspace from setup to search.
 
 ## 1. Install ANTMA
 
-From a local checkout:
+From PyPI:
 
 ```bash
 python3 -m venv .venv
 source .venv/bin/activate
-pip install .
+pip install antma
 ```
 
-For editable development installs and Git URL installs, see `INSTALL.md`.
+For local checkout, editable development installs, and Git URL installs, see
+`INSTALL.md`.
 
 ## 2. Create A Workspace
 
