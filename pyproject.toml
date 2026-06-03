@@ -8,7 +8,7 @@ version = "0.1.0"
 description = "AI-Native Team Memory Architecture for local-first agent operating memory and knowledge banks."
 readme = "README.md"
 requires-python = ">=3.9"
-license = { text = "MIT" }
+license = { text = "Apache-2.0" }
 authors = [
   { name = "ANTMA contributors" }
 ]
@@ -19,7 +19,7 @@ keywords = ["ai-agents", "memory", "markdown", "obsidian", "knowledge-management
 classifiers = [
   "Development Status :: 2 - Pre-Alpha",
   "Intended Audience :: Developers",
-  "License :: OSI Approved :: MIT License",
+  "License :: OSI Approved :: Apache Software License",
   "Programming Language :: Python :: 3",
   "Programming Language :: Python :: 3.9",
   "Programming Language :: Python :: 3.10",
@@ -34,6 +34,7 @@ Repository = "https://github.com/THEINNOLAB/ANTMA"
 Issues = "https://github.com/THEINNOLAB/ANTMA/issues"
 Security = "https://github.com/THEINNOLAB/ANTMA/security/advisories"
 Changelog = "https://github.com/THEINNOLAB/ANTMA/blob/main/CHANGELOG.md"
+License = "https://www.apache.org/licenses/LICENSE-2.0"
 
 [project.optional-dependencies]
 dev = ["pytest>=8"]

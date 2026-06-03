@@ -12,15 +12,16 @@ reviewed public snapshot.
 - [ ] `README.md` explains the project and quick start.
 - [ ] `README.md` defines ANTMA as a small memory architecture core.
 - [ ] `INSTALL.md` covers local, editable, and Git URL installation.
-- [ ] `LICENSE` is final.
+- [ ] `LICENSE` contains the Apache License 2.0 text.
 - [ ] CLI command works after `pip install .`.
 - [ ] Public repository URL is added to install guidance:
       `https://github.com/THEINNOLAB/ANTMA`.
 - [ ] Maintainer is listed as THEINNOLAB and authorship remains
       `ANTMA contributors`.
 - [ ] General contact points to GitHub Issues.
-- [ ] GitHub private vulnerability reporting is enabled if it will be used for
-      sensitive reports.
+- [ ] Security reporting says to prefer GitHub private vulnerability reporting,
+      with public-safe issue fallback for requesting a private disclosure
+      channel.
 
 ## Scope Exclusions
 

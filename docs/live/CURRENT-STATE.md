@@ -7,13 +7,14 @@ architecture library.
 
 Public repository URL: `https://github.com/THEINNOLAB/ANTMA`
 
+```text
+Author: ANTMA contributors
 Maintainer: THEINNOLAB
-
-Authorship: ANTMA contributors
-
-General contact: `https://github.com/THEINNOLAB/ANTMA/issues`
-
-Sensitive security reports: GitHub private vulnerability reporting, if enabled.
+License: Apache License 2.0
+Copyright: Copyright 2026 ANTMA contributors
+Issues: https://github.com/THEINNOLAB/ANTMA/issues
+Security: Prefer GitHub private vulnerability reporting. If unavailable, open a public-safe issue requesting a private disclosure channel; do not include sensitive details in the public issue.
+```
 
 ## Ready
 

@@ -163,9 +163,18 @@ ANTMA is maintained as a contributor-led public project. Package authorship is
 listed as `ANTMA contributors`, with THEINNOLAB maintaining the public GitHub
 repository.
 
-- General questions and bug reports: `https://github.com/THEINNOLAB/ANTMA/issues`
-- Sensitive security reports: use GitHub private vulnerability reporting if it
-  is enabled for the repository.
+```text
+Author: ANTMA contributors
+Maintainer: THEINNOLAB
+License: Apache License 2.0
+Copyright: Copyright 2026 ANTMA contributors
+Issues: https://github.com/THEINNOLAB/ANTMA/issues
+Security: Prefer GitHub private vulnerability reporting. If unavailable, open a public-safe issue requesting a private disclosure channel; do not include sensitive details in the public issue.
+```
+
+## License
+
+ANTMA is licensed under the Apache License 2.0. See `LICENSE`.
 
 ## Project Status
 
