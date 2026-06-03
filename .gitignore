@@ -1,0 +1,25 @@
+.DS_Store
+.venv/
+__pycache__/
+*.py[cod]
+*.egg-info/
+.pytest_cache/
+.ruff_cache/
+.mypy_cache/
+dist/
+build/
+.coverage
+.antma/
+*.db
+*.sqlite
+*.sqlite3
+.env
+.env.*
+
+# Local agent/runtime workspace files must never be published from this repo.
+.openclaw/
+/HEARTBEAT.md
+/IDENTITY.md
+/SOUL.md
+/TOOLS.md
+/USER.md
