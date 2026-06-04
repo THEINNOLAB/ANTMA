@@ -47,6 +47,7 @@ class ReasonCode(str, Enum):
     PROMOTION_WRITE_FAILED = "promotion_write_failed"
     SNAPSHOT_FAILED = "snapshot_failed"
     WRITE_CONFLICT = "write_conflict"
+    ROLLBACK_FAILED = "rollback_failed"
     EVIDENCE_MISSING = "evidence_missing"
     SOURCE_MISSING = "source_missing"
     SOURCE_HASH_MISSING = "source_hash_missing"
