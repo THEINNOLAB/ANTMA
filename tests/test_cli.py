@@ -134,7 +134,7 @@ def test_doctor_reports_db_missing_metadata(tmp_path: Path, capsys):
     root = tmp_path / "team-memory"
     assert main(["init", str(root)]) == 0
     db_path = root / ".antma" / "index.db"
-    db_path.parent.mkdir(parents=True)
+    db_path.parent.mkdir(parents=True, exist_ok=True)
     with sqlite3.connect(db_path) as conn:
         conn.execute(
             """
@@ -153,7 +153,7 @@ def test_doctor_reports_unsupported_index_schema(tmp_path: Path, capsys):
     root = tmp_path / "team-memory"
     assert main(["init", str(root)]) == 0
     db_path = root / ".antma" / "index.db"
-    db_path.parent.mkdir(parents=True)
+    db_path.parent.mkdir(parents=True, exist_ok=True)
     with sqlite3.connect(db_path) as conn:
         conn.execute(
             """

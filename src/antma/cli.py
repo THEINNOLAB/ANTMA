@@ -10,8 +10,18 @@ import sys
 from pathlib import Path
 from typing import Optional
 
+from antma.candidates import (
+    CandidateError,
+    CandidateValidationError,
+    create_candidate as create_json_candidate,
+    delete_candidate as delete_json_candidate,
+    discover_project_root,
+    list_candidates,
+    show_candidate,
+)
 from antma.evidence import render_evidence_packet
 from antma.indexer import IndexCompatibilityError, MemoryIndex, first_heading, infer_kind
+from antma.models import CandidateSensitivity, CandidateStatus, Risk, Scope, SourceKind
 from antma.promotion import render_promotion_candidate
 from antma.sanitize import format_findings, scan_path
 from antma.scaffold import WORKSPACE_SCHEMA_VERSION, create_workspace
@@ -28,8 +38,9 @@ def build_parser() -> argparse.ArgumentParser:
     subparsers = parser.add_subparsers(dest="command", required=True)
 
     init_parser = subparsers.add_parser("init", help="Create a memory workspace")
-    init_parser.add_argument("path", type=Path)
-    init_parser.add_argument("--overwrite", action="store_true")
+    init_parser.add_argument("path", nargs="?", type=Path, default=Path("."))
+    init_parser.add_argument("--force", action="store_true")
+    init_parser.add_argument("--overwrite", nargs="?", const="scaffold", action="append", default=[])
 
     sanitize_parser = subparsers.add_parser("sanitize", help="Scan for private data")
     sanitize_parser.add_argument("path", type=Path)
@@ -53,6 +64,39 @@ def build_parser() -> argparse.ArgumentParser:
     promote_parser.add_argument("--output", type=Path)
     promote_parser.add_argument("--overwrite", action="store_true")
 
+    candidate_parser = subparsers.add_parser("candidate", help="Manage JSON promotion candidates")
+    candidate_subparsers = candidate_parser.add_subparsers(dest="candidate_command", required=True)
+
+    candidate_create = candidate_subparsers.add_parser("create", help="Create a JSON candidate")
+    candidate_create.add_argument("--source")
+    candidate_create.add_argument(
+        "--source-type",
+        choices=[item.value for item in SourceKind],
+        default=SourceKind.FILE.value,
+    )
+    candidate_create.add_argument("--destination", required=True)
+    candidate_create.add_argument("--summary", required=True)
+    candidate_create.add_argument("--text", required=True)
+    candidate_create.add_argument("--scope", choices=[item.value for item in Scope], required=True)
+    candidate_create.add_argument("--risk", choices=[item.value for item in Risk], required=True)
+    candidate_create.add_argument(
+        "--sensitivity",
+        choices=[item.value for item in CandidateSensitivity],
+        required=True,
+    )
+    candidate_create.add_argument("--supersedes", action="append", default=[])
+    candidate_create.add_argument("--evidence", action="append", default=[])
+
+    candidate_list = candidate_subparsers.add_parser("list", help="List JSON candidates")
+    candidate_list.add_argument("--status", choices=[item.value for item in CandidateStatus])
+
+    candidate_show = candidate_subparsers.add_parser("show", help="Show a JSON candidate")
+    candidate_show.add_argument("candidate_id")
+
+    candidate_delete = candidate_subparsers.add_parser("delete", help="Delete an unpromoted candidate")
+    candidate_delete.add_argument("candidate_id")
+    candidate_delete.add_argument("--reason")
+
     evidence_parser = subparsers.add_parser("evidence", help="Create an evidence packet")
     evidence_parser.add_argument("--objective", required=True)
     evidence_parser.add_argument("--status", choices=VALID_EVIDENCE_STATUSES, required=True)
@@ -71,7 +115,16 @@ def main(argv: Optional[list[str]] = None) -> int:
     args = parser.parse_args(argv)
 
     if args.command == "init":
-        written = create_workspace(args.path, overwrite=args.overwrite)
+        try:
+            overwrite_targets = parse_init_overwrite_targets(tuple(args.overwrite))
+        except ValueError as error:
+            parser.error(str(error))
+        written = create_workspace(
+            args.path,
+            overwrite="scaffold" in overwrite_targets,
+            force=args.force,
+            overwrite_targets=overwrite_targets,
+        )
         print(f"Created {len(written)} files in {args.path}")
         return 0
 
@@ -109,6 +162,9 @@ def main(argv: Optional[list[str]] = None) -> int:
             overwrite=args.overwrite,
         )
 
+    if args.command == "candidate":
+        return handle_candidate_command(args)
+
     if args.command == "evidence":
         return create_evidence_packet(
             objective=args.objective,
@@ -123,6 +179,67 @@ def main(argv: Optional[list[str]] = None) -> int:
 
     parser.error(f"Unknown command: {args.command}")
     return 2
+
+
+def handle_candidate_command(args: argparse.Namespace) -> int:
+    root = discover_project_root(Path.cwd())
+    try:
+        if args.candidate_command == "create":
+            candidate = create_json_candidate(
+                root=root,
+                source=args.source,
+                source_type=args.source_type,
+                destination=args.destination,
+                summary=args.summary,
+                text=args.text,
+                scope=args.scope,
+                risk=args.risk,
+                sensitivity=args.sensitivity,
+                supersedes=tuple(args.supersedes),
+                evidence_values=tuple(args.evidence),
+            )
+            print(candidate.candidate_id)
+            return 0
+
+        if args.candidate_command == "list":
+            candidates = list_candidates(root, status=args.status)
+            for candidate in candidates:
+                print(
+                    f"{candidate['candidate_id']}\t{candidate['status']}\t{candidate['summary']}"
+                )
+            return 0
+
+        if args.candidate_command == "show":
+            candidate = show_candidate(root, args.candidate_id)
+            print(json.dumps(candidate, ensure_ascii=False, indent=2, sort_keys=True))
+            return 0
+
+        if args.candidate_command == "delete":
+            delete_json_candidate(root, args.candidate_id, reason=args.reason)
+            print(f"Deleted {args.candidate_id}")
+            return 0
+    except (CandidateError, CandidateValidationError, ValueError) as error:
+        print(str(error), file=sys.stderr)
+        return 1
+
+    print(f"Unknown candidate command: {args.candidate_command}", file=sys.stderr)
+    return 2
+
+
+def parse_init_overwrite_targets(values: tuple[str, ...]) -> set[str]:
+    allowed = {"scaffold", "config", "policy"}
+    targets: set[str] = set()
+    for value in values:
+        for part in value.split(","):
+            target = part.strip()
+            if not target:
+                continue
+            if target not in allowed:
+                raise ValueError(
+                    "init --overwrite must be one of: scaffold, config, policy"
+                )
+            targets.add(target)
+    return targets
 
 
 def doctor_workspace(path: Path, db_path: Path) -> int:
