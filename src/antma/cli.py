@@ -35,6 +35,7 @@ from antma.ledger import filter_jsonl, read_jsonl
 from antma.models import CandidateSensitivity, CandidateStatus, Risk, Scope, SourceKind
 from antma.policy import PolicyValidationError, load_project_policy, policy_path
 from antma.promotion import render_promotion_candidate
+from antma.rollback import RollbackError, rollback_promotion
 from antma.review import run_review
 from antma.sanitize import format_findings, scan_path
 from antma.scaffold import WORKSPACE_SCHEMA_VERSION, create_workspace
@@ -171,6 +172,11 @@ def build_parser() -> argparse.ArgumentParser:
     ledger_show.add_argument("--type", choices=("audit", "promotions"), default="audit")
     ledger_show.add_argument("--candidate")
 
+    rollback_parser = subparsers.add_parser("rollback", help="Rollback a promotion")
+    rollback_parser.add_argument("promotion_id")
+    rollback_parser.add_argument("--dry-run", action="store_true")
+    rollback_parser.add_argument("--json", action="store_true", dest="json_output")
+
     return parser
 
 
@@ -259,6 +265,9 @@ def main(argv: Optional[list[str]] = None) -> int:
 
     if args.command == "ledger":
         return handle_ledger_command(args)
+
+    if args.command == "rollback":
+        return handle_rollback_command(args)
 
     parser.error(f"Unknown command: {args.command}")
     return 2
@@ -474,6 +483,24 @@ def handle_ledger_command(args: argparse.Namespace) -> int:
     for record in records:
         print(json.dumps(record, ensure_ascii=False, sort_keys=True))
     return 0
+
+
+def handle_rollback_command(args: argparse.Namespace) -> int:
+    root = discover_project_root(Path.cwd())
+    try:
+        result = rollback_promotion(root, args.promotion_id, dry_run=args.dry_run)
+    except RollbackError as error:
+        print(str(error), file=sys.stderr)
+        return 1
+    if args.json_output:
+        print(json.dumps(result, ensure_ascii=False, indent=2, sort_keys=True))
+    else:
+        print(
+            "{promotion_id}\t{candidate_id}\t{status}\t{destination}".format(
+                **result
+            )
+        )
+    return 0 if result["status"] != "failed" else 1
 
 
 def parse_init_overwrite_targets(values: tuple[str, ...]) -> set[str]:
