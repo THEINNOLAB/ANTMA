@@ -22,6 +22,24 @@ class CandidateStatus(str, Enum):
 
 class ReasonCode(str, Enum):
     LOW_RISK_AUTO_ALLOWED = "low_risk_auto_allowed"
+    HIGH_RISK_REQUIRES_REVIEW = "high_risk_requires_review"
+    SCOPE_REQUIRES_REVIEW = "scope_requires_review"
+    SENSITIVITY_REQUIRES_REVIEW = "sensitivity_requires_review"
+    SENSITIVE_DATA_DETECTED = "sensitive_data_detected"
+    CLASSIFIED_DATA_DETECTED = "secret_data_detected"
+    CLASSIFIED_REJECTED = "secret_rejected"
+    SOURCE_OUTSIDE_ROOT = "source_outside_root"
+    SOURCE_HASH_MISMATCH = "source_hash_mismatch"
+    SOURCE_STALE = "source_stale"
+    SOURCE_FRESHNESS_UNKNOWN = "source_freshness_unknown"
+    DESTINATION_OUTSIDE_ROOT = "destination_outside_root"
+    DESTINATION_NOT_WRITABLE = "destination_not_writable"
+    DESTINATION_MISSING = "destination_missing"
+    CONFLICT_DETECTED = "conflict_detected"
+    APPEND_ONLY_REQUIRED = "append_only_required"
+    POLICY_INVALID = "policy_invalid"
+    POLICY_NOT_FOUND = "policy_not_found"
+    TEXT_TOO_LONG = "text_too_long"
     MANUAL_APPROVAL_REQUIRED = "manual_approval_required"
     EVIDENCE_MISSING = "evidence_missing"
     SOURCE_MISSING = "source_missing"
@@ -57,6 +75,24 @@ class SourceKind(str, Enum):
     MANUAL = "manual"
     MESSAGE = "message"
     API = "api"
+
+
+@dataclass
+class GateResult:
+    status: str
+    reason_code: str
+    next_action: str
+    messages: List[str] = field(default_factory=list)
+    conflicts: List[Dict[str, Any]] = field(default_factory=list)
+
+    def to_dict(self) -> Dict[str, Any]:
+        return {
+            "status": self.status,
+            "reason_code": self.reason_code,
+            "next_action": self.next_action,
+            "messages": list(self.messages),
+            "conflicts": list(self.conflicts),
+        }
 
 
 @dataclass

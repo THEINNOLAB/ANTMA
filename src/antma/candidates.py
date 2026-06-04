@@ -19,6 +19,7 @@ from antma.models import (
     CandidateSensitivity,
     CandidateSource,
     CandidateStatus,
+    GateResult,
     Risk,
     Scope,
     SourceKind,
@@ -52,6 +53,12 @@ DELETABLE_STATUSES = {
     CandidateStatus.REJECTED.value,
     CandidateStatus.FAILED.value,
 }
+REVIEWABLE_ALL_STATUSES = (
+    CandidateStatus.CANDIDATE.value,
+    CandidateStatus.BLOCKED.value,
+    CandidateStatus.MANUAL_REVIEW.value,
+    CandidateStatus.HELD.value,
+)
 
 
 class CandidateError(ValueError):
@@ -244,6 +251,22 @@ def list_candidates(root: Path, status: Optional[str] = None) -> List[Dict[str, 
     return [load_candidate(path) for path in iter_candidate_files(root, status=status)]
 
 
+def candidate_files_for_review(
+    root: Path,
+    candidate_id: Optional[str] = None,
+    run_all: bool = False,
+) -> List[Path]:
+    root = root.resolve()
+    ensure_antma_state(root)
+    if candidate_id:
+        return [find_candidate_file(root, candidate_id)]
+    statuses = REVIEWABLE_ALL_STATUSES if run_all else (CandidateStatus.CANDIDATE.value,)
+    files: List[Path] = []
+    for status in statuses:
+        files.extend(iter_candidate_files(root, status=status))
+    return sorted(files, key=lambda path: (load_candidate(path).get("created_at", ""), path.stem))
+
+
 def find_candidate_file(root: Path, candidate_id: str) -> Path:
     root = root.resolve()
     ensure_antma_state(root)
@@ -273,6 +296,39 @@ def delete_candidate(root: Path, candidate_id: str, actor: str = "antma-cli", re
         actor=actor,
         reason=reason,
     )
+
+
+def apply_gate_result(root: Path, path: Path, result: GateResult) -> Dict[str, Any]:
+    data = load_candidate(path)
+    from_status = data["status"]
+    data["status"] = result.status
+    data["reason_code"] = result.reason_code
+    data["next_action"] = result.next_action
+    data["updated_at"] = utc_now()
+    data["conflicts"] = result.conflicts
+    metadata = data.setdefault("metadata", {})
+    metadata["gate_messages"] = list(result.messages)
+
+    validate_candidate(data, root=None)
+    target = candidate_path(root, data["candidate_id"], result.status)
+    target.parent.mkdir(parents=True, exist_ok=True)
+    target.write_text(
+        json.dumps(data, ensure_ascii=False, indent=2, sort_keys=True) + "\n",
+        encoding="utf-8",
+    )
+    if path.resolve() != target.resolve() and path.exists():
+        path.unlink()
+    append_audit_event(
+        root,
+        "review.run",
+        candidate_id=data["candidate_id"],
+        from_status=from_status,
+        to_status=result.status,
+        reason_code=result.reason_code,
+        next_action=result.next_action,
+        actor="antma-cli",
+    )
+    return data
 
 
 def validate_candidate(data: Dict[str, Any], root: Optional[Path] = None) -> None:
