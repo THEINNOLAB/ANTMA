@@ -29,7 +29,9 @@ from antma.candidates import (
     show_candidate,
 )
 from antma.evidence import render_evidence_packet
+from antma.executor import PromotionError, run_promotions
 from antma.indexer import IndexCompatibilityError, MemoryIndex, first_heading, infer_kind
+from antma.ledger import filter_jsonl, read_jsonl
 from antma.models import CandidateSensitivity, CandidateStatus, Risk, Scope, SourceKind
 from antma.policy import PolicyValidationError, load_project_policy, policy_path
 from antma.promotion import render_promotion_candidate
@@ -37,6 +39,7 @@ from antma.review import run_review
 from antma.sanitize import format_findings, scan_path
 from antma.scaffold import WORKSPACE_SCHEMA_VERSION, create_workspace
 from antma.schema import EvidenceItem, EvidencePacket, MemoryKind, MemoryRecord
+from antma.status import project_status
 
 
 VALID_EVIDENCE_STATUSES = ("pass", "partial", "failed", "blocked")
@@ -159,10 +162,23 @@ def build_parser() -> argparse.ArgumentParser:
     evidence_parser.add_argument("--output", type=Path, required=True)
     evidence_parser.add_argument("--overwrite", action="store_true")
 
+    status_parser = subparsers.add_parser("status", help="Show ANTMA local state status")
+    status_parser.add_argument("--json", action="store_true", dest="json_output")
+
+    ledger_parser = subparsers.add_parser("ledger", help="Show ANTMA ledgers")
+    ledger_subparsers = ledger_parser.add_subparsers(dest="ledger_command", required=True)
+    ledger_show = ledger_subparsers.add_parser("show", help="Show ledger records")
+    ledger_show.add_argument("--type", choices=("audit", "promotions"), default="audit")
+    ledger_show.add_argument("--candidate")
+
     return parser
 
 
 def main(argv: Optional[list[str]] = None) -> int:
+    if argv is None:
+        argv = sys.argv[1:]
+    if len(argv) >= 2 and argv[0] == "promote" and argv[1] == "run":
+        return handle_promote_run_args(argv[2:])
     parser = build_parser()
     args = parser.parse_args(argv)
 
@@ -238,8 +254,47 @@ def main(argv: Optional[list[str]] = None) -> int:
             overwrite=args.overwrite,
         )
 
+    if args.command == "status":
+        return handle_status_command(args)
+
+    if args.command == "ledger":
+        return handle_ledger_command(args)
+
     parser.error(f"Unknown command: {args.command}")
     return 2
+
+
+def handle_promote_run_args(argv: list[str]) -> int:
+    parser = argparse.ArgumentParser(prog="antma promote run")
+    parser.add_argument("candidate_id", nargs="?")
+    parser.add_argument("--dry-run", action="store_true")
+    parser.add_argument("--fail-fast", action="store_true")
+    parser.add_argument("--json", action="store_true", dest="json_output")
+    args = parser.parse_args(argv)
+    root = discover_project_root(Path.cwd())
+    try:
+        result = run_promotions(
+            root,
+            candidate_id=args.candidate_id,
+            dry_run=args.dry_run,
+            fail_fast=args.fail_fast,
+        )
+    except (PromotionError, CandidateError, ValueError) as error:
+        print(str(error), file=sys.stderr)
+        return 1
+    if args.json_output:
+        print(json.dumps(result, ensure_ascii=False, indent=2, sort_keys=True))
+    else:
+        for item in result["results"]:
+            print(
+                "{candidate_id}\t{status}\t{promotion_id}\t{destination}".format(
+                    candidate_id=item.get("candidate_id"),
+                    status=item.get("status"),
+                    promotion_id=item.get("promotion_id"),
+                    destination=item.get("destination"),
+                )
+            )
+    return 0
 
 
 def handle_candidate_command(args: argparse.Namespace) -> int:
@@ -391,6 +446,34 @@ def handle_approvals_command(args: argparse.Namespace) -> int:
 
     print(f"Unknown approvals command: {args.approvals_command}", file=sys.stderr)
     return 2
+
+
+def handle_status_command(args: argparse.Namespace) -> int:
+    root = discover_project_root(Path.cwd())
+    status = project_status(root)
+    if args.json_output:
+        print(json.dumps(status, ensure_ascii=False, indent=2, sort_keys=True))
+    else:
+        print(f"Root: {status['root']}")
+        for name, count in status["queues"].items():
+            print(f"{name}: {count}")
+        print(f"audit_events: {status['audit_events']}")
+        print(f"promotions: {status['promotions']}")
+    return 0
+
+
+def handle_ledger_command(args: argparse.Namespace) -> int:
+    root = discover_project_root(Path.cwd())
+    ledger_name = "promotions.jsonl" if args.type == "promotions" else "audit.jsonl"
+    path = root / ".antma" / "ledger" / ledger_name
+    records = (
+        list(filter_jsonl(path, candidate_id=args.candidate))
+        if args.candidate
+        else read_jsonl(path)
+    )
+    for record in records:
+        print(json.dumps(record, ensure_ascii=False, sort_keys=True))
+    return 0
 
 
 def parse_init_overwrite_targets(values: tuple[str, ...]) -> set[str]:
