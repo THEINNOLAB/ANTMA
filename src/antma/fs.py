@@ -22,6 +22,10 @@ def sha256_file(path: Path) -> str:
     return f"sha256:{digest.hexdigest()}"
 
 
+def sha256_text(text: str) -> str:
+    return f"sha256:{hashlib.sha256(text.encode('utf-8')).hexdigest()}"
+
+
 def resolve_destination(root: Path, destination: Union[str, Path]) -> Path:
     """Resolve a destination inside root and reject root escape or .antma writes."""
 
