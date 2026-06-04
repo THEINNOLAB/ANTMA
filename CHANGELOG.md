@@ -7,6 +7,30 @@ Before then, entries may describe public release-candidate milestones.
 
 ## Unreleased
 
+## 0.2.0 - Filesystem Promotion Engine
+
+- Added `.antma/` filesystem state with config, policy, queues, ledgers,
+  snapshots, locks, and tmp staging.
+- Added JSON candidate creation, listing, showing, deletion, manual sources,
+  evidence, and supersedes metadata.
+- Added TOML policy loading and validation with Python 3.9/3.10 `tomli`
+  compatibility.
+- Added policy gate review routing for auto-passed, manual-review, blocked,
+  rejected, held, approved, promoted, and rolled-back candidates.
+- Added manual approval commands and Python API support for approve, reject,
+  hold, and material edits.
+- Added append-only `antma promote run [candidate_id]` with marker blocks,
+  destination locks, snapshots, audit ledger records, and promotion ledger
+  records.
+- Added rollback by promotion id with destination-hash write-conflict
+  detection.
+- Added status and ledger inspection commands.
+- Preserved the 0.1 workspace scaffold, schema exports, search/index tools,
+  evidence packet renderer, and legacy `antma promote <source> --reason ...`
+  Markdown helper.
+
+## Public Release Hardening
+
 - Clarified public beta scope: ANTMA remains a small memory architecture core,
   not an agent runtime, scheduler, messaging system, routing layer, hosted
   memory service, or organization-specific operating system.

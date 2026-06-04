@@ -63,5 +63,6 @@ reviewed public snapshot.
 - [ ] Explain the canonical ledger rule.
 - [ ] Explain that adapters are optional derived views.
 - [ ] Mention that examples are synthetic.
-- [ ] State that automatic promotion, agent routing, and delivery automation are
-      out of scope for the public core.
+- [ ] State that policy-gated promotion is local-first and append-only, while
+      agent routing, delivery automation, hosted memory services, and automatic
+      dreaming loops are out of scope for the public core.

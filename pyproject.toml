@@ -4,8 +4,8 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "antma"
-version = "0.1.0"
-description = "AI-Native Team Memory Architecture for local-first agent operating memory and knowledge banks."
+version = "0.2.0"
+description = "Filesystem-first memory promotion engine for AI-native team memory."
 readme = "README.md"
 requires-python = ">=3.9"
 license = { text = "Apache-2.0" }

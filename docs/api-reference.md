@@ -1,21 +1,103 @@
 # API Reference
 
-ANTMA is a small pre-release package. The API below describes the public surface
-currently exposed by the package and CLI.
+ANTMA is a small public beta package. The API below describes the public surface
+currently exposed by the package and CLI, including the 0.2 filesystem-first
+promotion engine.
 
 ## CLI
 
-### `antma init PATH`
+### `antma init [PATH]`
 
 Create a generic memory workspace at `PATH`.
 
 Options:
 
-- `--overwrite`: rewrite existing template files.
+- `--force`: supplement missing `.antma/` state without deleting queues,
+  ledgers, snapshots, locks, or tmp files.
+- `--overwrite`: rewrite existing scaffold template files.
+- `--overwrite config --overwrite policy`: rewrite targeted `.antma` defaults.
 
-`init` creates `antma.json` with `format: "antma-workspace"`,
-`workspace_schema_version: 1`, and `canonical_ledger: "markdown"`. Running
-`init` again adds missing files only unless `--overwrite` is set.
+`init` creates the 0.1 scaffold and the 0.2 `.antma/` local state layout.
+Running `init` again adds missing files only unless overwrite options are set.
+
+### `antma candidate create|list|show|delete`
+
+Create and inspect JSON memory candidates in `.antma/queue/`.
+
+`candidate create` accepts:
+
+- `--source`
+- `--source-type file|manual|message|api`
+- `--destination`
+- `--summary`
+- `--text`
+- `--scope personal|project|shared|persona|ssot|security`
+- `--risk low|medium|high|critical`
+- `--sensitivity public|internal|sensitive|secret`
+- `--supersedes`, repeatable
+- `--evidence`, repeatable
+
+Manual source candidates may omit `--source` but still require text, summary,
+destination, scope, risk, sensitivity, and evidence completeness.
+
+### `antma review run [CANDIDATE_ID]`
+
+Evaluate candidates against the configured TOML policy.
+
+Options:
+
+- `--all`: include pending candidates, retryable blocked candidates, and
+  manual-review or held candidates that need re-evaluation.
+- `--policy NAME`: use `.antma/policies/<NAME>.toml`.
+- `--json`: output candidate-level gate results.
+
+### `antma approvals list|show|approve|reject|hold|edit`
+
+Manage manual review candidates. Material edits reset gate decisions and move
+the candidate back to `candidate` status for review.
+
+### `antma promote run [CANDIDATE_ID]`
+
+Append approved or auto-passed candidates into their Markdown destination using
+ANTMA marker blocks.
+
+Options:
+
+- `--dry-run`
+- `--fail-fast`
+- `--json`
+
+The 0.1 helper `antma promote SOURCE --reason TEXT` remains available and is
+separate from `antma promote run`.
+
+### `antma rollback PROMOTION_ID`
+
+Rollback a promotion marker block using `.antma/ledger/promotions.jsonl`.
+
+Options:
+
+- `--dry-run`
+- `--json`
+
+Rollback fails with `write_conflict` if the destination no longer matches the
+post-promotion hash recorded in the promotion ledger.
+
+### `antma status`
+
+Show queue counts and ledger counts. Use `--json` for machine-readable output.
+
+### `antma ledger show`
+
+Show audit or promotion ledger records.
+
+Options:
+
+- `--type audit|promotions`
+- `--candidate CANDIDATE_ID`
+
+### `antma policy validate|show`
+
+Validate or print the configured TOML policy.
 
 ### `antma sanitize PATH`
 
@@ -128,6 +210,43 @@ Key methods:
 ### `EvidencePacket`
 
 Dataclass for auditable completion claims.
+
+## Project API
+
+```python
+from antma import AntmaProject
+
+project = AntmaProject.open(".")
+candidate = project.create_candidate(
+    source="notes/today.md",
+    destination="memory/project.md",
+    summary="Korean operating reply preference",
+    text="Brad prefers short Korean operating replies.",
+    scope="project",
+    risk="low",
+    sensitivity="internal",
+)
+review_result = project.review.run(candidate_id=candidate.candidate_id)
+promotion = project.promote(candidate.candidate_id)
+status = project.status()
+```
+
+Manual approval API:
+
+```python
+project.approvals.list()
+project.approvals.show(candidate.candidate_id)
+project.approvals.approve(candidate.candidate_id, reviewer="local-user")
+project.approvals.reject(candidate.candidate_id, reason="source insufficient")
+project.approvals.hold(candidate.candidate_id, reason="needs confirmation")
+project.approvals.edit(candidate.candidate_id, proposed_text="Updated text.")
+```
+
+Rollback API:
+
+```python
+project.rollback("prom_20260604_072500_abcd")
+```
 
 ## Resolver
 

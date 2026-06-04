@@ -1,9 +1,9 @@
 # Current State
 
-Updated: 2026-06-03
+Updated: 2026-06-04
 
-ANTMA is an initial public GitHub release candidate for a local-first memory
-architecture library.
+ANTMA is an early public beta for a local-first, filesystem-first memory
+promotion engine.
 
 Public repository URL: `https://github.com/THEINNOLAB/ANTMA`
 
@@ -18,8 +18,13 @@ Security: Prefer GitHub private vulnerability reporting. If unavailable, open a 
 
 ## Ready
 
-- Core package, CLI, schemas, resolver, sanitizer, SQLite FTS index, promotion
-  candidate rendering, and evidence packet rendering are present.
+- Core package, CLI, schemas, resolver, sanitizer, SQLite FTS index, legacy
+  Markdown promotion helper, and evidence packet rendering are present.
+- ANTMA 0.2 filesystem state is present under `.antma/`: config, policy,
+  queues, audit ledger, promotion ledger, snapshots, locks, and tmp staging.
+- JSON candidates, policy gate review, approvals, append-only promotion,
+  status, ledger inspection, and rollback are implemented.
+- Python API entrypoint `AntmaProject` is exported.
 - Public-safe examples and templates are included.
 - GitHub issue, pull request, and test workflow templates are included.
 - Local privacy boundary docs are explicit.
@@ -34,14 +39,18 @@ Security: Prefer GitHub private vulnerability reporting. If unavailable, open a 
 
 ## Verification Baseline
 
-Before the first public push, run:
+Before release or publication, run:
 
 ```bash
-python3 -m pytest -q
-PYTHONPATH=src python3 -m compileall -q src tests
-PYTHONPATH=src python3 -m antma.cli sanitize .
+/private/tmp/antma-venv39/bin/python -m pytest
+/private/tmp/antma-venv39/bin/python -m compileall src tests
+python3.9 -m pytest
+python3.9 -m compileall src tests
+python3 -m pytest
+python3 -m compileall src tests
+antma sanitize .
 ```
 
 The public repository URL is reflected in package and installation metadata.
-Before pushing, configure repository metadata and enable GitHub private
-vulnerability reporting if that route will be used for sensitive reports.
+GitHub private vulnerability reporting is the preferred sensitive disclosure
+route when available.

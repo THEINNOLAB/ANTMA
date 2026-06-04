@@ -1,6 +1,7 @@
 # PyPI Release Guide
 
-ANTMA 0.1.0 is published on PyPI:
+ANTMA 0.1.0 is published on PyPI. Version 0.2.0 should be published from the
+merged release commit after local checks pass:
 
 ```bash
 pip install antma
@@ -56,6 +57,8 @@ After publishing:
 - include release notes
 - verify install from a clean environment
 - run a sample `antma init`, `sanitize`, `index`, and `search` flow
+- run a sample `candidate create`, `review run`, `promote run`, `status`, and
+  `rollback` flow
 
 ## Install Verification
 

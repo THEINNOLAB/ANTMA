@@ -9,7 +9,8 @@ editable developer checkout, PyPI, or the public Git repository.
 - pip
 - git, if installing from a repository URL
 
-ANTMA has no runtime third-party dependencies in the initial version.
+ANTMA uses the Python standard library on Python 3.11 and newer. On Python
+3.9/3.10, it installs `tomli` for TOML policy parsing.
 
 ## Option 1: Install From PyPI
 
@@ -66,9 +67,26 @@ Create and inspect a sample local memory workspace:
 
 ```bash
 antma init ./team-memory
-antma sanitize ./team-memory
-antma index ./team-memory --db ./team-memory/.antma/index.db
-antma search "truth" --db ./team-memory/.antma/index.db
+cd ./team-memory
+mkdir -p notes memory
+printf 'Brad prefers short Korean operating replies.\n' > notes/today.md
+printf '# Project Memory\n' > memory/project.md
+antma candidate create \
+  --source notes/today.md \
+  --source-type file \
+  --destination memory/project.md \
+  --summary "Korean operating reply preference" \
+  --text "Brad prefers short Korean operating replies." \
+  --scope project \
+  --risk low \
+  --sensitivity internal \
+  --evidence notes/today.md
+antma review run --all
+antma promote run
+antma status --json
+antma sanitize .
+antma index . --db .antma/index.db
+antma search "truth" --db .antma/index.db
 ```
 
 ## Privacy Check Before Sharing

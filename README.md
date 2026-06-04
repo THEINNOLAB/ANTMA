@@ -2,13 +2,13 @@
 
 AI-Native Team Memory Architecture.
 
-ANTMA is a local-first Python library for teams that run AI agents and need a
-clear boundary between agent operating memory and reusable knowledge.
+ANTMA is a local-first Python library and CLI for teams that run AI agents and
+need a clear, auditable path from raw operating notes to durable team memory.
 
-It is deliberately small. ANTMA is a memory architecture layer: it helps teams
-keep raw logs, durable memory, source-of-truth notes, promotion candidates,
-evidence packets, and knowledge bank entries separate while still making them
-searchable and usable.
+It is deliberately small. ANTMA is a filesystem-first memory promotion engine:
+it helps teams create candidates, run policy gates, route manual approvals,
+append durable memory updates, record ledgers, snapshot changes, and roll back
+promotions without turning a search backend into the source of truth.
 
 ## Why ANTMA
 
@@ -34,6 +34,9 @@ adapters are derived views.
   reference material.
 - Source-of-truth documents outrank general memory and search results.
 - Promotion candidates are pending evidence, not durable truth.
+- Policy gates decide whether candidates can promote automatically or need
+  manual review.
+- Promotions append marker blocks and write audit/promotion ledgers.
 - Evidence packets make completion claims auditable.
 - External backends may support search or analysis, but they do not own truth.
 
@@ -46,6 +49,10 @@ ANTMA owns the public-safe core of team memory:
 - recall priority rules
 - privacy scanning guardrails
 - promotion candidates for reviewed memory changes
+- policy-gated review and manual approvals
+- append-only promotion into Markdown destinations
+- audit and promotion ledgers
+- rollback by promotion id
 - evidence packets for auditable completion claims
 - local derived search indexes
 
@@ -57,7 +64,7 @@ ANTMA intentionally does not include:
 - agent routing, model orchestration, or persona management
 - organization-specific operating rules, names, or workflows
 - hosted memory services
-- automatic promotion or dreaming loops
+- automatic dreaming loops
 
 ## Install
 
@@ -92,19 +99,51 @@ Create a local memory workspace:
 antma init ./team-memory
 ```
 
-Scan a workspace before sharing or publishing:
+Create and promote a local memory candidate:
 
 ```bash
-antma sanitize ./team-memory
+cd ./team-memory
+mkdir -p notes memory
+printf 'Brad prefers short Korean operating replies.\n' > notes/today.md
+printf '# Project Memory\n' > memory/project.md
+
+antma candidate create \
+  --source notes/today.md \
+  --source-type file \
+  --destination memory/project.md \
+  --summary "Korean operating reply preference" \
+  --text "Brad prefers short Korean operating replies." \
+  --scope project \
+  --risk low \
+  --sensitivity internal \
+  --evidence notes/today.md
+
+antma review run --all
+antma promote run
+antma status --json
 ```
 
-Create a reviewable promotion candidate and evidence packet:
+Manual review candidates can be approved, rejected, held, or edited:
 
 ```bash
-antma promote ./team-memory/daily/example.md --reason "Candidate durable fact."
-antma evidence --objective "Public release check" --status pass \
-  --criterion "tests pass" --evidence "pytest=pass=all tests passed" \
-  --output ./team-memory/evidence/release-check.md
+antma approvals list
+antma approvals approve <candidate_id>
+antma approvals reject <candidate_id> --reason "source insufficient"
+antma approvals hold <candidate_id> --reason "needs confirmation"
+antma approvals edit <candidate_id> --text "Updated memory text."
+```
+
+Rollback is promotion-ledger based:
+
+```bash
+antma ledger show --type promotions
+antma rollback <promotion_id>
+```
+
+The legacy 0.1 Markdown candidate helper is still available:
+
+```bash
+antma promote ./daily/example.md --reason "Candidate durable fact."
 ```
 
 Build a local SQLite FTS index and search it:
@@ -120,6 +159,15 @@ antma search "launch decision" --db ./team-memory/.antma/index.db
 ```text
 team-memory/
   antma.json
+  .antma/
+    config.toml
+    policies/default.toml
+    queue/
+    ledger/audit.jsonl
+    ledger/promotions.jsonl
+    snapshots/
+    locks/
+    tmp/
   MEMORY.shared.md
   agents/default/MEMORY.md
   ssot/example.md
@@ -176,19 +224,18 @@ ANTMA is licensed under the Apache License 2.0. See `LICENSE`.
 
 ## Release
 
-Current package release: `v0.1.0`.
+Current source version: `v0.2.0`.
 
-- PyPI: `https://pypi.org/project/antma/0.1.0/`
+- PyPI: `https://pypi.org/project/antma/`
 - Install: `pip install antma`
-- GitHub Release: `v0.1.0` still needs to be created from the published
-  release commit.
+- PyPI and GitHub Release `v0.2.0` should be published from the release commit.
 
 ## Project Status
 
-ANTMA is an early public beta package. Version `0.1.0` is published on PyPI and
-the repository includes public-release docs, issue and pull request templates,
-and a GitHub Actions test workflow.
+ANTMA is an early public beta package. Version `0.2.0` introduces the
+filesystem-first memory promotion engine while preserving the 0.1 scaffold and
+legacy Markdown candidate helper.
 
-The current focus is keeping the memory architecture small, reviewable, and
+The current focus is keeping the promotion engine small, reviewable, and
 public-safe while improving examples, tests, documentation, and narrowly scoped
 CLI/library behavior.

@@ -1,5 +1,6 @@
 """ANTMA: AI-Native Team Memory Architecture."""
 
+from antma.project import AntmaProject
 from antma.schema import (
     EvidenceItem,
     EvidencePacket,
@@ -10,6 +11,7 @@ from antma.schema import (
 )
 
 __all__ = [
+    "AntmaProject",
     "EvidenceItem",
     "EvidencePacket",
     "MemoryKind",
@@ -17,4 +19,3 @@ __all__ = [
     "MemoryStatus",
     "Sensitivity",
 ]
-
