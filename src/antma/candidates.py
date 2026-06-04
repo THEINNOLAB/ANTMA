@@ -233,6 +233,24 @@ def load_candidate(path: Path) -> Dict[str, Any]:
     return json.loads(path.read_text(encoding="utf-8"))
 
 
+def write_candidate_data(
+    root: Path,
+    data: Dict[str, Any],
+    old_path: Optional[Path] = None,
+    validate_root: bool = False,
+) -> Path:
+    validate_candidate(data, root=root if validate_root else None)
+    target = candidate_path(root, data["candidate_id"], data["status"])
+    target.parent.mkdir(parents=True, exist_ok=True)
+    target.write_text(
+        json.dumps(data, ensure_ascii=False, indent=2, sort_keys=True) + "\n",
+        encoding="utf-8",
+    )
+    if old_path is not None and old_path.resolve() != target.resolve() and old_path.exists():
+        old_path.unlink()
+    return target
+
+
 def iter_candidate_files(root: Path, status: Optional[str] = None) -> Iterable[Path]:
     statuses = [status] if status else list(QUEUE_DIR_BY_STATUS)
     for candidate_status in statuses:
@@ -309,15 +327,7 @@ def apply_gate_result(root: Path, path: Path, result: GateResult) -> Dict[str, A
     metadata = data.setdefault("metadata", {})
     metadata["gate_messages"] = list(result.messages)
 
-    validate_candidate(data, root=None)
-    target = candidate_path(root, data["candidate_id"], result.status)
-    target.parent.mkdir(parents=True, exist_ok=True)
-    target.write_text(
-        json.dumps(data, ensure_ascii=False, indent=2, sort_keys=True) + "\n",
-        encoding="utf-8",
-    )
-    if path.resolve() != target.resolve() and path.exists():
-        path.unlink()
+    write_candidate_data(root, data, old_path=path, validate_root=False)
     append_audit_event(
         root,
         "review.run",
