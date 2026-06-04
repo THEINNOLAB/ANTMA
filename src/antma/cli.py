@@ -10,6 +10,15 @@ import sys
 from pathlib import Path
 from typing import Optional
 
+from antma.approvals import (
+    ApprovalError,
+    approve_candidate,
+    edit_candidate as edit_approval_candidate,
+    hold_candidate,
+    list_approvals,
+    reject_candidate,
+    show_approval,
+)
 from antma.candidates import (
     CandidateError,
     CandidateValidationError,
@@ -114,6 +123,32 @@ def build_parser() -> argparse.ArgumentParser:
     policy_show = policy_subparsers.add_parser("show", help="Show an ANTMA policy")
     policy_show.add_argument("--policy", default="default")
 
+    approvals_parser = subparsers.add_parser("approvals", help="Manage manual candidate approvals")
+    approvals_subparsers = approvals_parser.add_subparsers(dest="approvals_command", required=True)
+    approvals_list = approvals_subparsers.add_parser("list", help="List candidates awaiting approval")
+    approvals_list.add_argument("--status", choices=[CandidateStatus.MANUAL_REVIEW.value, CandidateStatus.HELD.value])
+    approvals_show = approvals_subparsers.add_parser("show", help="Show a candidate awaiting approval")
+    approvals_show.add_argument("candidate_id")
+    approvals_approve = approvals_subparsers.add_parser("approve", help="Approve a candidate")
+    approvals_approve.add_argument("candidate_id")
+    approvals_approve.add_argument("--reviewer", default="local-user")
+    approvals_reject = approvals_subparsers.add_parser("reject", help="Reject a candidate")
+    approvals_reject.add_argument("candidate_id")
+    approvals_reject.add_argument("--reason", required=True)
+    approvals_reject.add_argument("--reviewer", default="local-user")
+    approvals_hold = approvals_subparsers.add_parser("hold", help="Place a candidate on hold")
+    approvals_hold.add_argument("candidate_id")
+    approvals_hold.add_argument("--reason", required=True)
+    approvals_hold.add_argument("--reviewer", default="local-user")
+    approvals_edit = approvals_subparsers.add_parser("edit", help="Edit a candidate awaiting approval")
+    approvals_edit.add_argument("candidate_id")
+    approvals_edit.add_argument("--text")
+    approvals_edit.add_argument("--scope", choices=[item.value for item in Scope])
+    approvals_edit.add_argument("--risk", choices=[item.value for item in Risk])
+    approvals_edit.add_argument("--sensitivity", choices=[item.value for item in CandidateSensitivity])
+    approvals_edit.add_argument("--destination")
+    approvals_edit.add_argument("--supersedes", action="append")
+
     evidence_parser = subparsers.add_parser("evidence", help="Create an evidence packet")
     evidence_parser.add_argument("--objective", required=True)
     evidence_parser.add_argument("--status", choices=VALID_EVIDENCE_STATUSES, required=True)
@@ -187,6 +222,9 @@ def main(argv: Optional[list[str]] = None) -> int:
 
     if args.command == "policy":
         return handle_policy_command(args)
+
+    if args.command == "approvals":
+        return handle_approvals_command(args)
 
     if args.command == "evidence":
         return create_evidence_packet(
@@ -296,6 +334,62 @@ def handle_policy_command(args: argparse.Namespace) -> int:
         return 1
 
     print(f"Unknown policy command: {args.policy_command}", file=sys.stderr)
+    return 2
+
+
+def handle_approvals_command(args: argparse.Namespace) -> int:
+    root = discover_project_root(Path.cwd())
+    try:
+        if args.approvals_command == "list":
+            for candidate in list_approvals(root, status=args.status):
+                print(
+                    f"{candidate['candidate_id']}\t{candidate['status']}\t{candidate['summary']}"
+                )
+            return 0
+        if args.approvals_command == "show":
+            candidate = show_approval(root, args.candidate_id)
+            print(json.dumps(candidate, ensure_ascii=False, indent=2, sort_keys=True))
+            return 0
+        if args.approvals_command == "approve":
+            candidate = approve_candidate(root, args.candidate_id, reviewer=args.reviewer)
+            print(f"Approved {candidate['candidate_id']}")
+            return 0
+        if args.approvals_command == "reject":
+            candidate = reject_candidate(
+                root,
+                args.candidate_id,
+                reason=args.reason,
+                reviewer=args.reviewer,
+            )
+            print(f"Rejected {candidate['candidate_id']}")
+            return 0
+        if args.approvals_command == "hold":
+            candidate = hold_candidate(
+                root,
+                args.candidate_id,
+                reason=args.reason,
+                reviewer=args.reviewer,
+            )
+            print(f"Held {candidate['candidate_id']}")
+            return 0
+        if args.approvals_command == "edit":
+            candidate = edit_approval_candidate(
+                root,
+                args.candidate_id,
+                proposed_text=args.text,
+                scope=args.scope,
+                risk=args.risk,
+                sensitivity=args.sensitivity,
+                destination=args.destination,
+                supersedes=args.supersedes,
+            )
+            print(f"Edited {candidate['candidate_id']}")
+            return 0
+    except (ApprovalError, CandidateError, CandidateValidationError, ValueError) as error:
+        print(str(error), file=sys.stderr)
+        return 1
+
+    print(f"Unknown approvals command: {args.approvals_command}", file=sys.stderr)
     return 2
 
 
