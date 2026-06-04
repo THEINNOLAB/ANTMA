@@ -3,10 +3,11 @@
 from __future__ import annotations
 
 import hashlib
+import fnmatch
 import os
 import tempfile
 from pathlib import Path
-from typing import Optional, Union
+from typing import Iterable, Optional, Union
 
 
 class PathValidationError(ValueError):
@@ -40,6 +41,35 @@ def resolve_destination(root: Path, destination: Union[str, Path]) -> Path:
         raise PathValidationError("Destination must be a file path inside the project root.")
 
     return resolved
+
+
+def is_within_root(root: Path, path: Path) -> bool:
+    root_path = root.resolve()
+    try:
+        path.resolve(strict=False).relative_to(root_path)
+    except ValueError:
+        return False
+    return True
+
+
+def relative_path_for_policy(root: Path, path: Path) -> str:
+    try:
+        return path.resolve(strict=False).relative_to(root.resolve()).as_posix()
+    except ValueError:
+        return path.as_posix()
+
+
+def fnmatch_policy_path(path: str, patterns: Iterable[str]) -> bool:
+    normalized = path.replace(os.sep, "/")
+    for pattern in patterns:
+        normalized_pattern = pattern.replace(os.sep, "/")
+        if fnmatch.fnmatchcase(normalized, normalized_pattern):
+            return True
+        if "/**/" in normalized_pattern:
+            zero_depth_pattern = normalized_pattern.replace("/**/", "/")
+            if fnmatch.fnmatchcase(normalized, zero_depth_pattern):
+                return True
+    return False
 
 
 def atomic_write_text(path: Path, content: str, tmp_dir: Optional[Path] = None) -> None:

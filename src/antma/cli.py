@@ -22,7 +22,9 @@ from antma.candidates import (
 from antma.evidence import render_evidence_packet
 from antma.indexer import IndexCompatibilityError, MemoryIndex, first_heading, infer_kind
 from antma.models import CandidateSensitivity, CandidateStatus, Risk, Scope, SourceKind
+from antma.policy import PolicyValidationError, load_project_policy, policy_path
 from antma.promotion import render_promotion_candidate
+from antma.review import run_review
 from antma.sanitize import format_findings, scan_path
 from antma.scaffold import WORKSPACE_SCHEMA_VERSION, create_workspace
 from antma.schema import EvidenceItem, EvidencePacket, MemoryKind, MemoryRecord
@@ -97,6 +99,21 @@ def build_parser() -> argparse.ArgumentParser:
     candidate_delete.add_argument("candidate_id")
     candidate_delete.add_argument("--reason")
 
+    review_parser = subparsers.add_parser("review", help="Run policy gates")
+    review_subparsers = review_parser.add_subparsers(dest="review_command", required=True)
+    review_run = review_subparsers.add_parser("run", help="Evaluate candidates against policy")
+    review_run.add_argument("candidate_id", nargs="?")
+    review_run.add_argument("--all", action="store_true", dest="run_all")
+    review_run.add_argument("--policy", default="default")
+    review_run.add_argument("--json", action="store_true", dest="json_output")
+
+    policy_parser = subparsers.add_parser("policy", help="Inspect or validate policy")
+    policy_subparsers = policy_parser.add_subparsers(dest="policy_command", required=True)
+    policy_validate = policy_subparsers.add_parser("validate", help="Validate an ANTMA policy")
+    policy_validate.add_argument("--policy", default="default")
+    policy_show = policy_subparsers.add_parser("show", help="Show an ANTMA policy")
+    policy_show.add_argument("--policy", default="default")
+
     evidence_parser = subparsers.add_parser("evidence", help="Create an evidence packet")
     evidence_parser.add_argument("--objective", required=True)
     evidence_parser.add_argument("--status", choices=VALID_EVIDENCE_STATUSES, required=True)
@@ -165,6 +182,12 @@ def main(argv: Optional[list[str]] = None) -> int:
     if args.command == "candidate":
         return handle_candidate_command(args)
 
+    if args.command == "review":
+        return handle_review_command(args)
+
+    if args.command == "policy":
+        return handle_policy_command(args)
+
     if args.command == "evidence":
         return create_evidence_packet(
             objective=args.objective,
@@ -223,6 +246,56 @@ def handle_candidate_command(args: argparse.Namespace) -> int:
         return 1
 
     print(f"Unknown candidate command: {args.candidate_command}", file=sys.stderr)
+    return 2
+
+
+def handle_review_command(args: argparse.Namespace) -> int:
+    root = discover_project_root(Path.cwd())
+    try:
+        if args.review_command == "run":
+            results = run_review(
+                root,
+                candidate_id=args.candidate_id,
+                run_all=args.run_all,
+                policy_name=args.policy,
+            )
+            if args.json_output:
+                print(json.dumps(results, ensure_ascii=False, indent=2, sort_keys=True))
+            else:
+                for result in results:
+                    print(
+                        "{candidate_id}\t{from_status}->{to_status}\t{reason_code}\t{next_action}".format(
+                            **result
+                        )
+                    )
+            return 0
+    except (CandidateError, CandidateValidationError, PolicyValidationError, ValueError) as error:
+        print(str(error), file=sys.stderr)
+        return 1
+
+    print(f"Unknown review command: {args.review_command}", file=sys.stderr)
+    return 2
+
+
+def handle_policy_command(args: argparse.Namespace) -> int:
+    root = discover_project_root(Path.cwd())
+    try:
+        if args.policy_command == "validate":
+            load_project_policy(root, args.policy)
+            print(f"Policy {args.policy}: valid")
+            return 0
+        if args.policy_command == "show":
+            path = policy_path(root, args.policy)
+            if not path.exists():
+                raise PolicyValidationError(f"Policy not found: {args.policy}")
+            load_project_policy(root, args.policy)
+            print(path.read_text(encoding="utf-8"), end="")
+            return 0
+    except PolicyValidationError as error:
+        print(str(error), file=sys.stderr)
+        return 1
+
+    print(f"Unknown policy command: {args.policy_command}", file=sys.stderr)
     return 2
 
 

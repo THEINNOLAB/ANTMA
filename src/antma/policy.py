@@ -105,6 +105,17 @@ def load_policy(path: Path) -> dict[str, Any]:
     return policy
 
 
+def policy_path(root: Path, name: str = "default") -> Path:
+    return root.resolve() / ".antma" / "policies" / f"{name}.toml"
+
+
+def load_project_policy(root: Path, name: str = "default") -> dict[str, Any]:
+    path = policy_path(root, name)
+    if not path.exists():
+        raise PolicyValidationError(f"Policy not found: {name}")
+    return load_policy(path)
+
+
 def validate_policy(policy: dict[str, Any]) -> None:
     if policy.get("version") != 1:
         raise PolicyValidationError("Policy version must be 1.")
